@@ -26,9 +26,8 @@ namespace Meow
             _hookID = SetHook(_proc);
             InitSoundMap();
             InitTrayIcon();
-            this.WindowState = FormWindowState.Minimized;
+            this.WindowState = FormWindowState.Minimized; //視窗最小化
             this.ShowInTaskbar = false; // 不在工作列顯示
-            //notifyIcon.Icon = new Icon("resources/meow.ico");
         }
         private void InitTrayIcon()
         {
@@ -37,9 +36,10 @@ namespace Meow
             exitItem.Click += (s, e) => Application.Exit();
             trayMenu.Items.Add(exitItem);
 
+            //縮圖
             notifyIcon = new NotifyIcon
             {
-                //Icon = SystemIcons.Information, // 可換成你自己的圖示 *.ico
+                //自訂icon
                 Icon = new Icon("img/icon.ico"),
                 ContextMenuStrip = trayMenu,
                 Text = "喵喵鍵盤",
@@ -85,12 +85,17 @@ namespace Meow
                 //{
                 //    _instance.PlaySound(_instance.soundMap[key]);
                 //}
+
                 // 不再限制特定按鍵，所有鍵皆觸發
                 _instance.PlayRandomSound();
             }
             return CallNextHookEx(_hookID, nCode, wParam, lParam);
         }
 
+        /// <summary>
+        /// 有指定按鍵用這支
+        /// </summary>
+        /// <param name="filePath"></param>
         private void PlaySound(string filePath)
         {
             StopCurrentSound();
@@ -107,6 +112,9 @@ namespace Meow
             waveOut.Init(audioReader);
             waveOut.Play();
         }
+
+
+        //隨機撥放音效
         private void PlayRandomSound()
         {
             StopCurrentSound();
@@ -128,6 +136,7 @@ namespace Meow
             waveOut.Play();
         }
 
+        //停止當前音效
         private void StopCurrentSound()
         {
             waveOut?.Stop();
@@ -137,6 +146,10 @@ namespace Meow
             audioReader?.Dispose();
             audioReader = null;
         }
+        /// <summary>
+        /// 關閉前釋放資源
+        /// </summary>
+        /// <param name="e"></param>
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             StopCurrentSound();                  // 釋放音效
@@ -146,8 +159,8 @@ namespace Meow
             trayMenu.Dispose();
             base.OnFormClosing(e);
         }
-
-        // Win32 API declarations
+        #region Win32 API
+        
         private const int WH_KEYBOARD_LL = 13;
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
@@ -164,5 +177,6 @@ namespace Meow
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
+        #endregion
     }
 }
