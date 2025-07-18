@@ -1,6 +1,7 @@
 ﻿using NAudio.Wave;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace Meow
 {
@@ -14,6 +15,9 @@ namespace Meow
         private WaveOutEvent waveOut;
         private AudioFileReader audioReader;
         private static Form1 _instance;
+
+        private System.Windows.Forms.NotifyIcon notifyIcon;
+        private System.Windows.Forms.ContextMenuStrip trayMenu;
         public Form1()
         {
             InitializeComponent();
@@ -21,8 +25,33 @@ namespace Meow
             _proc = HookCallback;
             _hookID = SetHook(_proc);
             InitSoundMap();
+            InitTrayIcon();
+            this.WindowState = FormWindowState.Minimized;
+            this.ShowInTaskbar = false; // 不在工作列顯示
+            //notifyIcon.Icon = new Icon("resources/meow.ico");
         }
+        private void InitTrayIcon()
+        {
+            trayMenu = new ContextMenuStrip();
+            var exitItem = new ToolStripMenuItem("結束");
+            exitItem.Click += (s, e) => Application.Exit();
+            trayMenu.Items.Add(exitItem);
 
+            notifyIcon = new NotifyIcon
+            {
+                //Icon = SystemIcons.Information, // 可換成你自己的圖示 *.ico
+                Icon = new Icon("img/icon.ico"),
+                ContextMenuStrip = trayMenu,
+                Text = "喵喵鍵盤",
+                Visible = true
+            };
+            notifyIcon.DoubleClick += (s, e) =>
+            {
+                this.WindowState = FormWindowState.Normal;
+                this.ShowInTaskbar = true;
+                this.BringToFront();
+            };
+        }
         private void InitSoundMap()
         {
             soundMap = new Dictionary<Keys, string>
@@ -112,6 +141,9 @@ namespace Meow
         {
             StopCurrentSound();                  // 釋放音效
             UnhookWindowsHookEx(_hookID);        // 移除 Hook
+            notifyIcon.Visible = false;
+            notifyIcon.Dispose();
+            trayMenu.Dispose();
             base.OnFormClosing(e);
         }
 

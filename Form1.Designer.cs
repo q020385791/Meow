@@ -28,7 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
+            notifyIcon1 = new NotifyIcon(components);
             SuspendLayout();
+            // 
+            // notifyIcon1
+            // 
+            notifyIcon1.Text = "notifyIcon1";
+            notifyIcon1.Visible = true;
             // 
             // Form1
             // 
@@ -41,5 +48,7 @@
         }
 
         #endregion
+
+        private NotifyIcon notifyIcon1;
     }
 }
